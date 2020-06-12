@@ -1,9 +1,31 @@
 
 /*******************************************************************************
 
-Display the pulse length of a RC servo.
+# RC Servo Pulse Monitor
+
+Display the pulse length of a RC servo output.
 The pulse length and its corresponding percentage value (-100% ... +100%) is
-shown on a 128 x 32 I2C OLED display (with SSD1306 controller).
+shown on a common 128 x 32 I2C OLED display (with SSD1306 controller).
+
+## Wiring scheme
+
+| OLED | Arduino |
+|------|---------|
+| SDA  | A4      |
+| SCL  | A5      |
+| VCC  | +5V     |
+| GND  | GND     |
+
+| Servo | Arduino |
+|-------|---------|
+| Sig.  | 11      |
+| VCC   | +5V     |
+| GND   | GND     |
+
+Tipp: Pin 11 is also available on the ISP header.
+
+## Dependencies
+
 Requires the following Arduino libraries:
 - Adafruit_GFX
 - Adafruit_SSD1306
@@ -27,7 +49,7 @@ Requires the following Arduino libraries:
 
 //------------------------------------------------------------------------------
 
-Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT);
 
 //------------------------------------------------------------------------------
 
@@ -57,14 +79,25 @@ float filteredPulse = t_0;
 void setup()
 {
   Serial.begin(115200);
+  pinMode(SERVO_IN, INPUT_PULLUP);
+  pinMode(FAIL_LED, OUTPUT);
+  digitalWrite(FAIL_LED, 1);
 
+  delay(600);
   if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C))
   {
     Serial.println(F("Failed to initialize display."));
+    for (;;)
+    {
+      delay(100);
+      digitalWrite(FAIL_LED, 0);
+      delay(100);
+      digitalWrite(FAIL_LED, 1);
+    }
   }
 
-  pinMode(FAIL_LED, OUTPUT);
-  pinMode(SERVO_IN, INPUT_PULLUP);
+  //display.display();
+  //delay(500);
 }
 
 //------------------------------------------------------------------------------
